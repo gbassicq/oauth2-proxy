@@ -109,11 +109,6 @@ func (p *ConquestProvider) Configure(tenant string) {
 
 func (p *ConquestProvider) GetLoginURL(redirectURI, state, _ string) string {
 	extraParams := url.Values{}
-	if p.ProtectedResource != nil && p.ProtectedResource.String() != "" {
-		// extraParams.Add("resource", p.ProtectedResource.String())
-	}
-	// a := makeLoginURL(p.ProviderData, redirectURI, state, extraParams)
-	// a := 
 	a := *p.LoginURL
 	params, _ := url.ParseQuery(a.RawQuery)
 	params.Set("response_type", "code")
@@ -138,7 +133,7 @@ func (p *ConquestProvider) Redeem(ctx context.Context, redirectURL, code string)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	// blindly try json and x-www-form-urlencoded
 	var jsonResponse struct {
 		AccessToken  string `json:"access_token"`
@@ -217,15 +212,15 @@ func (p *ConquestProvider) prepareRedeem(redirectURL, code string) (url.Values, 
 	if err != nil {
 		return params, err
 	}
-
-	params.Add("redirect_uri", redirectURL)
+	
+	params.Set("redirect_uri", redirectURL)
 	params.Add("client_id", p.ClientID)
 	params.Add("client_secret", clientSecret)
 	params.Add("code", code)
 	params.Add("response_type", "authorization_code")
-	if p.ProtectedResource != nil && p.ProtectedResource.String() != "" {
-		params.Add("resource", p.ProtectedResource.String())
-	}
+	// if p.ProtectedResource != nil && p.ProtectedResource.String() != "" {
+	// 	params.Add("resource", p.ProtectedResource.String())
+	// }
 	return params, nil
 }
 
