@@ -1,4 +1,4 @@
-name: ci
+name: Publish to Azure Container Registry
 
 on:
   push:
@@ -29,6 +29,9 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v2
         with:
+          registry: devazurecontainerregistry.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
