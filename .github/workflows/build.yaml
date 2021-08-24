@@ -2,13 +2,24 @@ name: Publish to Azure Container Registry
 
 on:
   push:
-    branches:
-      - 'conquest/master'
+    tags:
+      - 'v*.*.*'
 
 jobs:
-  docker:
+  publish:
+    if: github.event.base_ref == 'refs/heads/conquest/master'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+      - name: Set output
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+      - name: Check output
+        env:
+          RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
+        run: |
+          echo $RELEASE_VERSION
+          echo ${{ steps.vars.outputs.tag }}
       -
         name: Checkout
         uses: actions/checkout@v2
@@ -22,7 +33,7 @@ jobs:
         name: Login to Azure Container Registry
         uses: docker/login-action@v1 
         with:
-          registry: devazurecontainerregistry.azurecr.io
+          registry: ${{ secrets.ACR_REGISTRY }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
       -
@@ -33,5 +44,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            devazurecontainerregistry.azurecr.io/gbassi/docus-proxy:latest
-            devazurecontainerregistry.azurecr.io/gbassi/docus-proxy:1.0.0
+            ${{ secrets.ACR_REGISTRY }}/docus-proxy:latest
+            ${{ secrets.ACR_REGISTRY }}/docus-proxy:${{ steps.vars.outputs.tag }}
